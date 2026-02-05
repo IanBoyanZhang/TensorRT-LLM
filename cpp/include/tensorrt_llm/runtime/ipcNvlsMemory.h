@@ -71,18 +71,30 @@ public:
     // Return device pointer to multicast memory
     [[nodiscard]] T* getMulticastPointer() const
     {
+        if (!_handle)
+        {
+            return nullptr;
+        }
         return reinterpret_cast<T*>(_handle->mc_ptr);
     }
 
     // Return device pointer for current rank
     [[nodiscard]] T* getUnicastPointer() const
     {
+        if (!_handle)
+        {
+            return nullptr;
+        }
         return reinterpret_cast<T*>(_handle->uc_ptr);
     }
 
     // Return host list of device pointers to memory on each rank
     [[nodiscard]] T** getIpcUnicastPointers()
     {
+        if (!_handle)
+        {
+            return nullptr;
+        }
         return reinterpret_cast<T**>(_handle->ipc_uc_ptrs.data());
     }
 
@@ -96,12 +108,13 @@ public:
         if (_capacity > 0)
         {
             ipcNvlsFree(_handle);
+            _handle = nullptr;
             _capacity = 0;
         }
     }
 
 private:
     size_t _capacity = 0;
-    IpcNvlsHandle* _handle;
+    IpcNvlsHandle* _handle = nullptr;
 };
 } // namespace tensorrt_llm::runtime

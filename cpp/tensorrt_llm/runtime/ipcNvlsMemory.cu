@@ -33,7 +33,7 @@
         CUresult retval = cmd;                                                                                         \
         if (retval != CUDA_SUCCESS)                                                                                    \
         {                                                                                                              \
-            const char* error_string;                                                                                  \
+            char const* error_string;                                                                                  \
             cuGetErrorString(retval, &error_string);                                                                   \
             printf("Failed: Cuda error %s:%d '%s'\n", __FILE__, __LINE__, error_string);                               \
             exit(EXIT_FAILURE);                                                                                        \
@@ -239,7 +239,7 @@ public:
         nvls_handle->ipc_uc_vas.resize(ranks.size());
         nvls_handle->ipc_uc_handles.resize(ranks.size());
 
-        for (int i = 0; i < ranks.size(); i++)
+        for (std::size_t i = 0; i < ranks.size(); i++)
         {
             IpcMemHandle peer_ipc_handle = ipc_handle;
             ipc_communicator->bcastMemHandle(&peer_ipc_handle, i);
@@ -381,8 +381,8 @@ private:
             return CU_MEM_HANDLE_TYPE_POSIX_FILE_DESCRIPTOR;
         }
 
-        TLLM_LOG_TRACE("fabric status: state=%u status=%u clique=%u", device_id, fabric_info.state, fabric_info.status,
-            fabric_info.cliqueId);
+        TLLM_LOG_TRACE("fabric status: device_id=%d state=%u status=%u clique=%u", device_id, fabric_info.state,
+            fabric_info.status, fabric_info.cliqueId);
 
         CUCHECK(cuMemRelease(handle));
         // If we get here, fabric handles are supported.
@@ -494,7 +494,7 @@ IpcNvlsHandle* ipcNvlsAllocate(size_t size, std::set<int> group)
     handle->size = size;
     handle->uc_ptr = reinterpret_cast<uintptr_t>(ptr);
     handle->mc_ptr = reinterpret_cast<uintptr_t>(nvshmemx_mc_ptr(NVSHMEM_TEAM_WORLD, ptr));
-    for (int i = 0; i < ranks.size(); i++)
+    for (std::size_t i = 0; i < ranks.size(); i++)
     {
         handle->ipc_uc_ptrs.push_back(reinterpret_cast<uintptr_t>(nvshmem_ptr(ptr, i)));
     }
